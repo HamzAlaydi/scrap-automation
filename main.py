@@ -91,7 +91,7 @@ async def upload_accounts(file: UploadFile = File(...)):
 
 
 @app.get("/scrape_tweets")
-async def scrape_tweets(keyword: str, post_limit: int):
+async def scrape_tweets(keyword: str, post_limit: int, latest: str):
     global account_index
     # Load accounts from uploaded files
     accounts = load_accounts()
@@ -141,7 +141,7 @@ async def scrape_tweets(keyword: str, post_limit: int):
 
         # Initialize TweetScraper and scrape tweets
         scraper = TweetScraper()
-        tweets = await scraper.search_and_scrape_tweets(keyword, post_limit, cookies)
+        tweets = await scraper.search_and_scrape_tweets(keyword, post_limit, latest, cookies)
 
         # Save tweets to CSV
         await save_tweets_to_csv(tweets, keyword)

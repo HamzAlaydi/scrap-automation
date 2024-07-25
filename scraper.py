@@ -2,11 +2,12 @@ from playwright.async_api import async_playwright
 from login import login_to_twitter
 from urllib.parse import quote
 
+
 class TweetScraper:
     def login_to_twitter(self, username: str, password: str):
         return login_to_twitter(username, password)
 
-    async def search_and_scrape_tweets(self, keyword: str, number_of_tweets: int, cookies: list):
+    async def search_and_scrape_tweets(self, keyword: str, number_of_tweets: int, latest: str, cookies: list):
         tweets = []
         seen_tweets = set()
 
@@ -21,7 +22,10 @@ class TweetScraper:
                     await context.add_cookies(parsed_cookies)
 
                 page = await context.new_page()
-                search_url = f"https://twitter.com/search?q={quote(keyword)}&src=typed_query"
+                if latest == "true" and number_of_tweets > 0:
+                    search_url = f"https://twitter.com/search?q={quote(keyword)}&src=typed_query&f=live"
+                else:
+                    search_url = f"https://twitter.com/search?q={quote(keyword)}&src=typed_query"
                 await page.goto(search_url)
                 await page.wait_for_selector("[data-testid='primaryColumn']")
 
@@ -34,7 +38,8 @@ class TweetScraper:
                         tweet_info = {}
 
                         tweet_text_elem = await tweet_element.query_selector("div[data-testid='tweetText']")
-                        tweet_info['text'] = await tweet_text_elem.inner_text() if tweet_text_elem else "No text available"
+                        tweet_info[
+                            'text'] = await tweet_text_elem.inner_text() if tweet_text_elem else "No text available"
 
                         like_element = await tweet_element.query_selector("[data-testid='like']")
                         num_likes = await like_element.inner_text() if like_element else "0"
